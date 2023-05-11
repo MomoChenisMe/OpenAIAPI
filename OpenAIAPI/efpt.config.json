@@ -1,0 +1,65 @@
+﻿{
+   "CodeGenerationMode": 2,
+   "ContextClassName": "OpenAIContext",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": false,
+   "ModelNamespace": "",
+   "OutputContextPath": "Models",
+   "OutputPath": "Models",
+   "PreserveCasingWithRegex": true,
+   "ProjectRootNamespace": "OpenAIAPI",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "Tables": [
+      {
+         "Name": "[dbo].[TB_BUGQA]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TB_Chat]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TB_Embeddings]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TB_Folders]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TB_Texts]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TB_User]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TB_UserChatroom]",
+         "ObjectType": 0
+      }
+   ],
+   "UiHint": "127.0.0.1\\SQL2019DEV.OpenAI",
+   "UncountableWords": null,
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": true,
+   "UseDateOnlyTimeOnly": false,
+   "UseDbContextSplitting": true,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseHierarchyId": false,
+   "UseInflector": false,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": false,
+   "UseNoDefaultConstructor": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UseSchemaFolders": true,
+   "UseSpatial": false,
+   "UseT4": false
+}

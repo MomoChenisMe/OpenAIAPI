@@ -1,0 +1,12 @@
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine-amd64 AS base
+WORKDIR /app
+COPY app/publish .
+RUN apk add --no-cache icu-libs && apk add --no-cache tzdata
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+ENV TZ="Asia/Taipei"
+RUN apk add --no-cache gettext
+ENV LANG C.UTF-8
+ENV LANGUAGE C.UTF-8
+ENV LC_ALL C.UTF-8
+
+ENTRYPOINT ["dotnet", "OpenAIAPI.dll"]
