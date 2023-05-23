@@ -17,6 +17,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\Configurations\TB_BUGQAConfiguration.cs" />
+    <Compile Remove="Models\dbo\TB_BUGQA.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AI.Dev.OpenAI.GPT" Version="1.0.2" />
     <PackageReference Include="Google.Apis.Auth" Version="1.60.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.15" />

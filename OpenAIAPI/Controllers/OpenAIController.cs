@@ -177,28 +177,5 @@ namespace OpenAIAPI.Controllers
 
         //    return Ok(new { message = "QAEmbedding資料寫入完成" });
         //}
-
-        [HttpPost("AddQAEmbedding/{bugano}", Name = nameof(AddBugQAEmbedding))]
-        public async Task<IActionResult> AddBugQAEmbedding([FromRoute] string bugano, [FromQuery] string inputText)
-        {
-            //if (_openAIEmbeddings.CheckTextNullOrEmpty(inputText.text))
-            //{
-            //    return BadRequest("文本不得為空的");
-            //}
-
-            //if (_openAIEmbeddings.CheckTextTokenizer(inputText.text))
-            //{
-            //    return BadRequest("文本超過大小");
-            //}
-
-            //if (await _openAIEmbeddings.CheckTextIsAssigned(inputText.text))
-            //{
-            //    return BadRequest("文本已存在");
-            //}
-
-            await _openAIEmbeddings.AddBugQAEmbedding(bugano, inputText);
-
-            return Ok(new { message = "BugQAEmbedding資料寫入完成" });
-        }
     }
 }
