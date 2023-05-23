@@ -14,12 +14,12 @@ using OpenAIAPI.Filters;
 var builder = WebApplication.CreateBuilder(args);
 
 //建立 SeqLog
-Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).Enrich.WithProperty("Application", "Open AI API").CreateLogger();
+Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).Enrich.WithProperty("Application", "Open AI QA機器人和ChatGPT API").CreateLogger();
 
 try
 {
     //Log
-    Log.Information("Open AI API 啟動");
+    Log.Information("Open AI QA機器人和ChatGPT API 啟動");
     //Add services to the container.
     //DB
     AddDBServices(builder.Configuration, builder.Services);
@@ -105,8 +105,8 @@ void AddSwaggerService(IConfiguration configuration, IServiceCollection services
         options.SwaggerDoc("v1", new OpenApiInfo
         {
             Version = "v1",
-            Title = "Open AI Restful API",
-            Description = "使用Open AI API建立的Chat和QA服務<br><br>1.Google登入服務<br>2.ChatGPT3.5聊天室操作API<br>3.QA服務<br>4.Chat GPT 3.5串接<br>5.Embedding文本轉換和寫入",
+            Title = "Open AI QA機器人和ChatGPT Restful API",
+            Description = "使用Open AI API建立的ChatGPT和QA機器人<br><br>1.Google登入服務<br>2.ChatGPT3.5聊天室操作API<br>3.QA服務<br>4.Chat GPT 3.5串接<br>5.Embedding文本轉換和寫入",
         });
         //從應用程式的配置文件中讀取HostUrl: PathBase的值。
         string pathBase = configuration.GetValue<string>("HostUrl:PathBase");
@@ -116,11 +116,11 @@ void AddSwaggerService(IConfiguration configuration, IServiceCollection services
             options.DocumentFilter<SwaggerBasePathFilter>("/" + pathBase);
         }
         //定義一個安全性方案，此處為名為Basic的HTTP基本認證方案。
-        options.AddSecurityDefinition("Basic", new OpenApiSecurityScheme
+        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
         {
             Type = SecuritySchemeType.Http,
-            Scheme = "Basic",
-            Description = "輸入帳號和密碼進行認證"
+            Scheme = "Bearer",
+            Description = "輸入Token進行認證"
         });
         //為每個操作添加安全性要求。
         options.OperationFilter<SwaggerSecurityRequirementsOperationFilter>();
