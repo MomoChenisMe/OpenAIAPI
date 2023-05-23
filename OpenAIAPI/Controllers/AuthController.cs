@@ -50,13 +50,13 @@ namespace OpenAIAPI.Controllers
         }
 
         /// <summary>
-        /// 用於驗證Google One Tap 的IdToken
+        /// 用於驗證Google OpenID Connect
         /// </summary>
         /// <param name="idToken"></param>
         /// <returns></returns>
-        [HttpGet("GoogleOneTapSignIn/{idToken}", Name = nameof(GetGoogleOneTapSignIn))]
+        [HttpGet("GoogleOpenIDConnect/{idToken}", Name = nameof(GetGoogleOpenIDConnect))]
         [AllowAnonymous]
-        public async Task<IActionResult> GetGoogleOneTapSignIn(string idToken)
+        public async Task<IActionResult> GetGoogleOpenIDConnect(string idToken)
         {
             try
             {
