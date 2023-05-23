@@ -15,7 +15,6 @@ namespace OpenAIAPI.Models
         {
         }
 
-        public virtual DbSet<TB_BUGQA> TB_BUGQA { get; set; }
         public virtual DbSet<TB_Chat> TB_Chat { get; set; }
         public virtual DbSet<TB_Embeddings> TB_Embeddings { get; set; }
         public virtual DbSet<TB_Folders> TB_Folders { get; set; }
@@ -25,7 +24,6 @@ namespace OpenAIAPI.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfiguration(new Configurations.TB_BUGQAConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.TB_ChatConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.TB_EmbeddingsConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.TB_FoldersConfiguration());
