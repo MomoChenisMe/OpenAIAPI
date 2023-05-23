@@ -1,6 +1,9 @@
 
 # 📌 **Open AI QA機器人和ChatGPT API實作**
 
+![image](https://github.com/MomoChenisMe/OpenAIAPI/blob/main/DemoImage/OpenAIAPI-1.png)
+![image](https://github.com/MomoChenisMe/OpenAIAPI/blob/main/DemoImage/OpenAIAPI-2.png)
+
 使用Open AI API建立的ChatGPT和QA機器人<br>
 1. Google OpenID Connect登入服務<br>
 2. ChatGPT3.5/4聊天室操作API<br>
