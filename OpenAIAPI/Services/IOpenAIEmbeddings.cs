@@ -15,11 +15,9 @@ namespace OpenAIAPI.Services
         //Task<EmbeddingGenerateModel> UseEmbeddingGenerateText(Guid[] vectors, string inputText);
         Task<EmbeddingGenerateModel> GetTextSimilarWordsByEmbedding(string inputText);
         Task<QAGenerateModel> GetTop5TextsByEmbedding(string inputText);
-        Task<EmbeddingGenerateModel> GetBugQASimilarWordsByEmbedding(string inputText);
         bool CheckTextNullOrEmpty(string inputText);
         bool CheckTextTokenizer(string inputText);
         Task<Guid> AddQAEmbedding(string inputText);
-        Task<Guid> AddBugQAEmbedding(string bugano, string inputText);
     }
 
     public class OpenAIEmbeddings : IOpenAIEmbeddings
@@ -44,28 +42,6 @@ namespace OpenAIAPI.Services
             _logger = logger;
             totalTokenSize = _configuration.GetValue<int>("OpenAI:TotalTokenSize");
             qaGPTCompletionMaxTokenSize = _configuration.GetValue<int>("OpenAI:QAGPTCompletionMAXTokenSize");
-        }
-
-        public async Task<Guid> AddBugQAEmbedding(string bugano, string inputText)
-        {
-            var filterText = _openAIGPTToken.FilterAllSpecialSymbols(_openAIGPTToken.FilterHtmlTag(inputText));
-            var inputVector = await _openAIHttpService.GetTextEmbeddingVector(filterText);
-
-            var newTB_Embedding = new TB_Embeddings
-            {
-                Vector = string.Join(',', inputVector.Select(x => x.ToString(CultureInfo.InvariantCulture)))
-            };
-            _dbContext.TB_Embeddings.Add(newTB_Embedding);
-            await _dbContext.SaveChangesAsync();
-            var newBugQA = new TB_BUGQA
-            {
-                Bugano = bugano,
-                EmbeddingId = newTB_Embedding.Id,
-                TextHtml = inputText
-            };
-            _dbContext.TB_BUGQA.Add(newBugQA);
-            await _dbContext.SaveChangesAsync();
-            return newBugQA.Id;
         }
 
         public async Task<Guid> AddQAEmbedding(string inputText)
@@ -119,47 +95,6 @@ namespace OpenAIAPI.Services
                 return true;
             }
             return false;
-        }
-
-        public async Task<EmbeddingGenerateModel> GetBugQASimilarWordsByEmbedding(string inputText)
-        {
-            var inputVector = await _openAIHttpService.GetTextEmbeddingVector(inputText);
-
-            // 1. 使用並行處理
-            var allEmbeddings = await _dbContext.TB_Embeddings.ToListAsync();
-            var cosineSimilarities = new ConcurrentDictionary<Guid, double>();
-
-            // 2. 將所有嵌入向量保存在內存中，並將其轉換為float[]
-            var embeddingVectors = allEmbeddings.Select(e => new
-            {
-                e.Id,
-                Vector = e.Vector.Split(',').Select(float.Parse).ToArray()
-            }).ToList();
-
-            // 3. 適當地使用資料分批查詢
-            int batchSize = 100;
-            int batchCount = (int)Math.Ceiling(embeddingVectors.Count / (double)batchSize);
-
-            Parallel.ForEach(Partitioner.Create(0, batchCount), range =>
-            {
-                for (int i = range.Item1; i < range.Item2; i++)
-                {
-                    int from = i * batchSize;
-                    int to = Math.Min(from + batchSize, embeddingVectors.Count);
-
-                    for (int j = from; j < to; j++)
-                    {
-                        var e = embeddingVectors[j];
-                        var similarity = CalculateCosineSimilarity(inputVector, e.Vector);
-                        cosineSimilarities.TryAdd(e.Id, similarity);
-                    }
-                }
-            });
-
-            var sortedSimilarities = cosineSimilarities.OrderByDescending(x => x.Value).Take(5).ToDictionary(x => x.Key, x => x.Value);
-            var top5Vectors = sortedSimilarities.Select(x => x.Key).ToArray();
-
-            return await UseBugQAEmbeddingGeneratePrompt(top5Vectors, inputText);
         }
 
         public async Task<EmbeddingGenerateModel> GetTextSimilarWordsByEmbedding(string inputText)
@@ -237,39 +172,6 @@ namespace OpenAIAPI.Services
             {
                 prompt = sb.ToString(),
                 sourcePrompt = sb1.ToString()
-            };
-        }
-
-        private async Task<EmbeddingGenerateModel> UseBugQAEmbeddingGeneratePrompt(Guid[] vectors, string inputText)
-        {
-            StringBuilder sb = new StringBuilder();
-            var systemPrompt = _openAIPrompt.QASystemPrompt();
-            var qaPrompt = $"\n\nnQuestion:{inputText}";
-            var prompt = _openAIPrompt.QABugQAUserPrompt();
-            sb.Append(prompt);
-            var tokenizer = _openAIGPTToken.GetGPT3Tokenizer(systemPrompt + prompt + qaPrompt);
-            for (int i = 0; i < vectors.Length; i++)
-            {
-                var tbBugQAData = await _dbContext.TB_BUGQA.FirstOrDefaultAsync(text => text.EmbeddingId == vectors[i]);
-                if (tbBugQAData != null)
-                {
-                    var currentTextTokenizer = _openAIGPTToken.GetGPT3Tokenizer(tbBugQAData.TextHtml);
-                    if (tokenizer.tokens + currentTextTokenizer.tokens + qaGPTCompletionMaxTokenSize <= totalTokenSize)
-                    {
-                        tokenizer.tokens += currentTextTokenizer.tokens;
-                        sb.Append($"Bugano:{tbBugQAData.Bugano}\n{_openAIGPTToken.FilterHtmlTag(tbBugQAData.TextHtml)}\n");
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
-            sb.Append(qaPrompt);
-            return new EmbeddingGenerateModel
-            {
-                prompt = sb.ToString(),
-                sourcePrompt = ""
             };
         }
 
