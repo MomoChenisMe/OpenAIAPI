@@ -11,7 +11,7 @@ using OpenAIAPI.Models;
 
 namespace OpenAIAPI.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Route("/[controller]")]
     public class OpenAIController : ControllerBase
