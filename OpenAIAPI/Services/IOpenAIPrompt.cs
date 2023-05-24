@@ -8,25 +8,38 @@ namespace OpenAIAPI.Services
 {
     public interface IOpenAIPrompt
     {
+        /// <summary>
+        /// 取得問答生成中系統的提示。
+        /// </summary>
+        /// <returns>包含使用者的提示</returns>
         string QASystemPrompt();
+        /// <summary>
+        /// 取得問答生成中使用者的提示。
+        /// </summary>
+        /// <returns>包含使用者的提示</returns>
         string QATextUserPrompt();
+        /// <summary>
+        /// 取得問答生成中使用文本來源的提示。
+        /// </summary>
+        /// <returns>包含使用文本來源的提示</returns>
         string QATextUseSourcePrompt();
-
-        string QABugQAUserPrompt();
     }
 
     public class OpenAIPrompt : IOpenAIPrompt
     {
-        public string QABugQAUserPrompt()
-        {
-            return "Each context has a Bugano followed by the actual message. Briefly explain the content of the source, and if it contains an answer, please include it in the explanation. Do not directly output the content of the sources. You must find the most relevant Bugano from multiple sources for the given question. Please output Bugano in the following format, e.g. \"根據匹配為您找到:\n需求單號:20220303003\n需求說明:xxxx\n\n需求單號:20220303004:\n需求說明:zzzzz...\". If the question is not contained in the select sources or is not related to the select sources, say \"抱歉,您的提問未納入鏵得企業的系統需求QA問題集\". \n\n Sources:\n";
-        }
-
+        /// <summary>
+        /// 取得問答生成中系統的提示。
+        /// </summary>
+        /// <returns>包含使用者的提示</returns>
         public string QASystemPrompt()
         {
             return "Use Traditional Chinese, You'r name is MomoChenIsMe QA 助理 and an AI assistant developed by the R&D department. Your responsibility is to answer QA questions for MomoChenIsMe";
         }
 
+        /// <summary>
+        /// 取得問答生成中使用者的提示。
+        /// </summary>
+        /// <returns>包含使用者的提示</returns>
         public string QATextUserPrompt()
         {
             return "Answer the question as truthfully as possible using the provided context. " +
@@ -34,6 +47,10 @@ namespace OpenAIAPI.Services
                 "say \"抱歉,您的提問未納入QA問題集,因此我無法回答您的問題\".\n\nContext:\n";
         }
 
+        /// <summary>
+        /// 取得問答生成中使用文本來源的提示。
+        /// </summary>
+        /// <returns>包含使用文本來源的提示</returns>
         public string QATextUseSourcePrompt()
         {
             return "Each context has a TextGuid and TextName and TextContent followed by the actual message. " +

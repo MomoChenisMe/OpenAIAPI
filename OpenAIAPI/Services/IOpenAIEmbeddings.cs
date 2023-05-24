@@ -11,11 +11,36 @@ namespace OpenAIAPI.Services
 {
     public interface IOpenAIEmbeddings
     {
+        /// <summary>
+        /// 計算兩個向量的餘弦相似度。
+        /// </summary>
+        /// <param name="vectorA">第一個向量</param>
+        /// <param name="vectorB">第二個向量</param>
+        /// <returns>兩個向量的餘弦相似度</returns>
         double CalculateCosineSimilarity(float[] vectorA, float[] vectorB);
-        //Task<EmbeddingGenerateModel> UseEmbeddingGenerateText(Guid[] vectors, string inputText);
+        /// <summary>
+        /// 根據嵌入向量獲取與輸入文字相似的詞彙。
+        /// </summary>
+        /// <param name="inputText">輸入的文字</param>
+        /// <returns>包含相似詞彙的嵌入生成模型</returns>
         Task<EmbeddingGenerateModel> GetTextSimilarWordsByEmbedding(string inputText);
+        /// <summary>
+        /// 根據嵌入向量獲取與輸入文字相似度最高的五個文本。
+        /// </summary>
+        /// <param name="inputText">輸入的文字</param>
+        /// <returns>包含相似度最高的五個文本的問答生成模型</returns>
         Task<QAGenerateModel> GetTop5TextsByEmbedding(string inputText);
+        /// <summary>
+        /// 檢查輸入的文字是否為空或為 null。
+        /// </summary>
+        /// <param name="inputText">輸入的文字</param>
+        /// <returns>如果輸入的文字為空或為 null，則為 true；否則為 false</returns>
         bool CheckTextNullOrEmpty(string inputText);
+        /// <summary>
+        /// 檢查輸入的文字是否超過指定的Token數量限制。
+        /// </summary>
+        /// <param name="inputText">輸入的文字</param>
+        /// <returns>如果輸入的文字詞彙數量超過總詞彙數量限制，則為 true；否則為 false</returns>
         bool CheckTextTokenizer(string inputText);
         Task<Guid> AddQAEmbedding(string inputText);
     }
@@ -59,6 +84,12 @@ namespace OpenAIAPI.Services
             return newTB_Embedding.Id;
         }
 
+        /// <summary>
+        /// 計算兩個向量的餘弦相似度。
+        /// </summary>
+        /// <param name="vectorA">第一個向量</param>
+        /// <param name="vectorB">第二個向量</param>
+        /// <returns>兩個向量的餘弦相似度</returns>
         public double CalculateCosineSimilarity(float[] vectorA, float[] vectorB)
         {
             double dotProduct = 0.0;
@@ -78,6 +109,11 @@ namespace OpenAIAPI.Services
             return dotProduct / (normA * normB);
         }
 
+        /// <summary>
+        /// 檢查輸入的文字是否為空或為 null。
+        /// </summary>
+        /// <param name="inputText">輸入的文字</param>
+        /// <returns>如果輸入的文字為空或為 null，則為 true；否則為 false</returns>
         public bool CheckTextNullOrEmpty(string inputText)
         {
             if (inputText == null || string.IsNullOrWhiteSpace(inputText))
@@ -87,6 +123,11 @@ namespace OpenAIAPI.Services
             return false;
         }
 
+        /// <summary>
+        /// 檢查輸入的文字是否超過指定的總詞彙數量限制。
+        /// </summary>
+        /// <param name="inputText">輸入的文字</param>
+        /// <returns>如果輸入的文字詞彙數量超過總詞彙數量限制，則為 true；否則為 false</returns>
         public bool CheckTextTokenizer(string inputText)
         {
             var tokenizer = _openAIGPTToken.GetGPT3Tokenizer(inputText);
@@ -97,6 +138,11 @@ namespace OpenAIAPI.Services
             return false;
         }
 
+        /// <summary>
+        /// 根據嵌入向量獲取與輸入文字相似的詞彙。
+        /// </summary>
+        /// <param name="inputText">輸入的文字</param>
+        /// <returns>包含相似詞彙的嵌入生成模型</returns>
         public async Task<EmbeddingGenerateModel> GetTextSimilarWordsByEmbedding(string inputText)
         {
             var inputVector = await _openAIHttpService.GetTextEmbeddingVector(inputText);
@@ -138,6 +184,12 @@ namespace OpenAIAPI.Services
             return await UseTextEmbeddingGeneratePrompt(top5Vectors, inputText);
         }
 
+        /// <summary>
+        /// 使用文字嵌入生成模型的方法，根據提供的嵌入向量和輸入文字生成相應的提示。
+        /// </summary>
+        /// <param name="vectors">嵌入向量的Guid陣列</param>
+        /// <param name="inputText">輸入的文字</param>
+        /// <returns>嵌入生成模型，包含生成的提示</returns>
         private async Task<EmbeddingGenerateModel> UseTextEmbeddingGeneratePrompt(Guid[] vectors, string inputText)
         {
             StringBuilder sb = new StringBuilder();
@@ -175,6 +227,11 @@ namespace OpenAIAPI.Services
             };
         }
 
+        /// <summary>
+        /// 根據嵌入向量獲取與輸入文字相似度最高的五個文本。
+        /// </summary>
+        /// <param name="inputText">輸入的文字</param>
+        /// <returns>包含相似度最高的五個文本的問答生成模型</returns>
         public async Task<QAGenerateModel> GetTop5TextsByEmbedding(string inputText)
         {
             var inputVector = await _openAIHttpService.GetTextEmbeddingVector(inputText);
@@ -216,12 +273,24 @@ namespace OpenAIAPI.Services
             return await UseTop5TextGeneratePrompt(top5Vectors, inputText);
         }
 
+        /// <summary>
+        /// 使用頂部五個文本生成提示的方法，根據提供的嵌入向量和輸入文字生成問答生成模型。
+        /// </summary>
+        /// <param name="vectors">嵌入向量的Guid陣列</param>
+        /// <param name="inputText">輸入的文字</param>
+        /// <returns>問答生成模型，包含生成的提示和使用的文本清單</returns>
         private async Task<QAGenerateModel> UseTop5TextGeneratePrompt(Guid[] vectors, string inputText)
         {
             var guids = await GetTextGuidsAsync(vectors, inputText);
             return await GenerateQAPromptAsync(guids, inputText);
         }
 
+        /// <summary>
+        /// 根據提供的嵌入向量和輸入文字，獲取與嵌入向量相對應的文本的Guid清單。
+        /// </summary>
+        /// <param name="vectors">嵌入向量的Guid陣列</param>
+        /// <param name="inputText">輸入的文字</param>
+        /// <returns>與嵌入向量相對應的文本的Guid清單</returns>
         private async Task<List<Guid>> GetTextGuidsAsync(Guid[] vectors, string inputText)
         {
             var guids = new List<Guid>();
@@ -235,7 +304,7 @@ namespace OpenAIAPI.Services
                 if (tbTextData != null)
                 {
                     var textContent = FilterNewLines(tbTextData.TextContent);
-                    var tempPrompt = $"TextGuid:\"{tbTextData.Id}\"\nTextName:{tbTextData.Name}\nTextContent:{textContent}\n\n";
+                    var tempPrompt = $"TextGuid:\"{tbTextData.Id}\"\nTextName:\"{tbTextData.Name}\"\nTextContent:\"{textContent}\"\n\n";
                     var currentTextTokenizer = _openAIGPTToken.GetGPT3Tokenizer(tempPrompt);
                     int tokensNeeded = tokenizer.tokens + currentTextTokenizer.tokens + 200;
 
@@ -255,6 +324,11 @@ namespace OpenAIAPI.Services
             return guids;
         }
 
+        /// <summary>
+        /// 從ChatGPT回傳結果中獲取包含Guid的文本清單。
+        /// </summary>
+        /// <param name="prompt">問答生成的提示</param>
+        /// <returns>包含Guid的文本清單</returns>
         private async Task<List<Guid>> GetGuidsFromQAResultAsync(string prompt)
         {
             var qaResult = await _openAIHttpService.GetCustomChatGPTResponse(prompt, 0.0, 200);
@@ -271,6 +345,12 @@ namespace OpenAIAPI.Services
             return guids;
         }
 
+        /// <summary>
+        /// 根據提供的文本Guid清單和輸入文字生成問答生成模型的提示。
+        /// </summary>
+        /// <param name="guids">文本的Guid清單</param>
+        /// <param name="inputText">輸入的文字</param>
+        /// <returns>問答生成模型，包含生成的提示和使用的文本清單</returns>
         private async Task<QAGenerateModel> GenerateQAPromptAsync(List<Guid> guids, string inputText)
         {
             var prompt = _openAIPrompt.QATextUserPrompt();

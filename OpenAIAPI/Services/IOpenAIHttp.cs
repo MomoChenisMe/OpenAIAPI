@@ -17,13 +17,43 @@ namespace OpenAIAPI.Services
 {
     public interface IOpenAIHttpService
     {
+        /// <summary>
+        /// 獲取文字嵌入向量。
+        /// </summary>
+        /// <param name="inputText">輸入的文字內容</param>
+        /// <returns>文字的嵌入向量</returns>
         Task<float[]> GetTextEmbeddingVector(string inputText);
+        /// <summary>
+        /// 獲取 QAGPT 的回應。
+        /// </summary>
+        /// <param name="inputText">輸入的文字內容</param>
+        /// <returns>QAGPT 回應的非同步任務</returns>
         Task<string> GetQAGPTResponse(string inputText);
+        /// <summary>
+        /// 獲取 ChatGPT 的回應。
+        /// </summary>
+        /// <param name="messages">聊天訊息的清單</param>
+        /// <returns>ChatGPT 回應的非同步任務</returns>
         Task<ChatGPTMessageModel> GetChatGPTResponse(List<ChatGPTMessageModel> messages);
+        /// <summary>
+        /// 以流的方式獲取 QAGPT 的回應。
+        /// </summary>
+        /// <param name="inputText">輸入的文字內容</param>
+        /// <returns>QAGPT 回應的非同步可列舉字串</returns>
         IAsyncEnumerable<string> GetQAGPTResponseAsStreamAsync(string inputText);
-
+        /// <summary>
+        /// 以流的方式獲取 ChatGPT 的回應。
+        /// </summary>
+        /// <param name="messages">聊天訊息的清單</param>
+        /// <returns>ChatGPT 回應的非同步可列舉字串</returns>
         IAsyncEnumerable<string> GetChatGPTResponseAsStreamAsync(List<ChatGPTMessageModel> messages);
-
+        /// <summary>
+        /// 獲取自定義聊天GPT的回應。
+        /// </summary>
+        /// <param name="inputText">輸入的文字內容</param>
+        /// <param name="temperature">溫度參數，控制回應的隨機性。較高的溫度生成更隨機的回應，較低的溫度生成更確定性的回應</param>
+        /// <param name="maxTokens">生成回應的最大Token數量</param>
+        /// <returns>聊天GPT回應的非同步任務</returns>
         Task<string> GetCustomChatGPTResponse(string inputText, double temperature, int maxTokens);
     }
 
@@ -58,6 +88,11 @@ namespace OpenAIAPI.Services
             embeddingModel = _configuration.GetValue<string>("OpenAI:EmbeddingModel");
         }
 
+        /// <summary>
+        /// 以流的方式獲取 ChatGPT 的回應。
+        /// </summary>
+        /// <param name="messages">聊天訊息的清單</param>
+        /// <returns>ChatGPT 回應的非同步可列舉字串</returns>
         public async IAsyncEnumerable<string> GetChatGPTResponseAsStreamAsync(List<ChatGPTMessageModel> messages)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
@@ -127,6 +162,11 @@ namespace OpenAIAPI.Services
             }
         }
 
+        /// <summary>
+        /// 獲取 ChatGPT 的回應。
+        /// </summary>
+        /// <param name="messages">聊天訊息的清單</param>
+        /// <returns>ChatGPT 回應的非同步任務</returns>
         public async Task<ChatGPTMessageModel> GetChatGPTResponse(List<ChatGPTMessageModel> messages)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
@@ -174,6 +214,11 @@ namespace OpenAIAPI.Services
             }
         }
 
+        /// <summary>
+        /// 以流的方式獲取 QAGPT 的回應。
+        /// </summary>
+        /// <param name="inputText">輸入的文字內容</param>
+        /// <returns>QAGPT 回應的非同步可列舉字串</returns>
         public async IAsyncEnumerable<string> GetQAGPTResponseAsStreamAsync(string inputText)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
@@ -239,6 +284,11 @@ namespace OpenAIAPI.Services
             }
         }
 
+        /// <summary>
+        /// 獲取 QAGPT 的回應。
+        /// </summary>
+        /// <param name="inputText">輸入的文字內容</param>
+        /// <returns>QAGPT 回應的非同步任務</returns>
         public async Task<string> GetQAGPTResponse(string inputText)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
@@ -280,6 +330,11 @@ namespace OpenAIAPI.Services
             }
         }
 
+        /// <summary>
+        /// 獲取文字嵌入向量。
+        /// </summary>
+        /// <param name="inputText">輸入的文字內容</param>
+        /// <returns>文字的嵌入向量</returns>
         public async Task<float[]> GetTextEmbeddingVector(string inputText)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
@@ -305,6 +360,13 @@ namespace OpenAIAPI.Services
             }
         }
 
+        /// <summary>
+        /// 獲取自定義聊天GPT的回應。
+        /// </summary>
+        /// <param name="inputText">輸入的文字內容</param>
+        /// <param name="temperature">溫度參數，控制回應的隨機性。較高的溫度生成更隨機的回應，較低的溫度生成更確定性的回應</param>
+        /// <param name="maxTokens">生成回應的最大Token數量</param>
+        /// <returns>聊天GPT回應的非同步任務</returns>
         public async Task<string> GetCustomChatGPTResponse(string inputText, double temperature, int maxTokens)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);

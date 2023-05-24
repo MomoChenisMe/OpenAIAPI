@@ -12,6 +12,11 @@ namespace OpenAIAPI.Services
 {
     public interface IJWTToken
     {
+        /// <summary>
+        /// 獲取JWT令牌。
+        /// </summary>
+        /// <param name="payload">JWT的有效載荷</param>
+        /// <returns>JWT令牌的非同步任務</returns>
         Task<string> GetJWTToken(Payload payload);
     }
 
@@ -26,6 +31,11 @@ namespace OpenAIAPI.Services
             _configuration = configuration;
         }
 
+        /// <summary>
+        /// 獲取JWT令牌。
+        /// </summary>
+        /// <param name="payload">JWT的有效載荷</param>
+        /// <returns>JWT令牌的非同步任務</returns>
         public async Task<string> GetJWTToken(Payload payload)
         {
             var existingUser = await _dbContext.TB_User.FirstOrDefaultAsync(u => u.AccountEmail == payload.Email);
