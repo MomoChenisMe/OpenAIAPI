@@ -26,11 +26,11 @@
 
 ### OpenAI API設定
 - **OpenAI__Key** : Open AI API Key
-- **OpenAI__ChatGPTModel** : ChatGPT的Model(預設:gpt-3.5-turbo)
+- **OpenAI__ChatGPTModel** : ChatGPT的Model(預設:gpt-3.5-turbo,2023/06/13後可以改用gpt-3.5-turbo-0613/gpt-3.5-turbo-16k-0613)
 - **OpenAI__EmbeddingModel** : Embedding的Model(預設:text-embedding-ada-002)
 - **OpenAI__ChatGPTCompletionMAXTokenSize** : ChatGPT回答時的Token最大數量(預設:2048)
 - **OpenAI__QAGPTCompletionMAXTokenSize** : QA GPT回答時的Token最大數量(預設:1024)
-- **OpenAI__TotalTokenSize** : ChatGPT的提問和回應Token數量限制(預設:4096)(gpt-3.5-turbo最大:4096)
+- **OpenAI__TotalTokenSize** : ChatGPT的提問和回應Token數量限制(預設:4096)(gpt-3.5-turbo最大:4096)(gpt-3.5-turbo-16k-0613最大:16384)
 <br>
 
 ## 📒 **DB相關資訊**
