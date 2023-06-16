@@ -23,6 +23,11 @@ namespace OpenAIAPI.Services
         /// </summary>
         /// <returns>包含使用文本來源的提示</returns>
         string QATextUseSourcePrompt();
+        /// <summary>
+        /// 取得Function Calling文本來源提示描述。
+        /// </summary>
+        /// <returns>包含使用文本來源的提示</returns>
+        string QATextUseSourceFunctionCallPrompt();
     }
 
     public class OpenAIPrompt : IOpenAIPrompt
@@ -45,6 +50,17 @@ namespace OpenAIAPI.Services
             return "Answer the question as truthfully as possible using the provided context. " +
                 "If there is code, please wrap it in markdown syntax. If the answer is not contained within the text below or the text is empty " +
                 "say \"抱歉,您的提問未納入QA問題集,因此我無法回答您的問題\".\n\nContext:\n";
+        }
+
+        /// <summary>
+        /// 取得Function Calling文本來源提示描述。
+        /// </summary>
+        /// <returns>包含使用文本來源的提示</returns>
+        public string QATextUseSourceFunctionCallPrompt()
+        {
+            return "Each context has a TextGuid and TextName and TextContent followed by the actual message. " +
+                "Before providing an answer as accurately as possible, you must select multiple sources that can be used to answer the question. " +
+                "If no sources are selected, please output an empty array.";
         }
 
         /// <summary>
