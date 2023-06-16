@@ -2,6 +2,8 @@
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using AI.Dev.OpenAI.GPT;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using OpenAIAPI.Models;
@@ -281,7 +283,8 @@ namespace OpenAIAPI.Services
         /// <returns>問答生成模型，包含生成的提示和使用的文本清單</returns>
         private async Task<QAGenerateModel> UseTop5TextGeneratePrompt(Guid[] vectors, string inputText)
         {
-            var guids = await GetTextGuidsAsync(vectors, inputText);
+            //var guids = await GetTextGuidsAsync(vectors, inputText);
+            var guids = await GetTextGuidsByFunctionCallAsync(vectors, inputText);
             return await GenerateQAPromptAsync(guids, inputText);
         }
 
@@ -321,6 +324,95 @@ namespace OpenAIAPI.Services
             }
 
             guids.AddRange(await GetGuidsFromQAResultAsync(prompt + qaPrompt));
+            return guids;
+        }
+
+        private async Task<List<Guid>> GetTextGuidsByFunctionCallAsync(Guid[] vectors, string inputText)
+        {
+            var guids = new List<Guid>();
+            var prompt = "Sources:\n";
+            var tokenizer = new TokenCountModel
+            {
+                tokens = 0
+            };
+            var qaPrompt = $"\n\nQuestion:{inputText}";
+
+            foreach (var vector in vectors)
+            {
+                var tbTextData = await _dbContext.TB_Texts.FirstOrDefaultAsync(text => text.EmbeddingId == vector);
+                if (tbTextData != null)
+                {
+                    var textContent = FilterNewLines(tbTextData.TextContent);
+                    var tempPrompt = $"TextGuid:\"{tbTextData.Id}\"\nTextName:\"{tbTextData.Name}\"\nTextContent:\"{textContent}\"\n\n";
+                    var currentTextTokenizer = _openAIGPTToken.GetGPT3Tokenizer(tempPrompt);
+                    int tokensNeeded = tokenizer.tokens + currentTextTokenizer.tokens + 200;
+
+                    if (tokensNeeded > totalTokenSize)
+                    {
+                        guids.AddRange(await GetGuidsFromQAFunctionCallResultAsync(prompt + qaPrompt));
+                        prompt = _openAIPrompt.QATextUseSourcePrompt();
+                        tokenizer = _openAIGPTToken.GetGPT3Tokenizer(prompt + qaPrompt);
+                    }
+
+                    tokenizer.tokens += currentTextTokenizer.tokens;
+                    prompt += tempPrompt;
+                }
+            }
+
+            guids.AddRange(await GetGuidsFromQAFunctionCallResultAsync(prompt + qaPrompt));
+            return guids;
+        }
+
+        private async Task<List<Guid>> GetGuidsFromQAFunctionCallResultAsync(string prompt)
+        {
+            var functionName = "get_QA_Use_Souce";
+            var required = new List<string>();
+            List<FunctionCallModel> functions = new List<FunctionCallModel>();
+            required.Add("textGuid");
+            required.Add("textName");
+            FunctionCallModel functionCall = new FunctionCallModel()
+            {
+                name = functionName,
+                description = _openAIPrompt.QATextUseSourceFunctionCallPrompt(),
+                parameters = new ParamterModel
+                {
+                    type = "object",
+                    properties = new Dictionary<string, PropertyModel>
+                    {
+                        ["data"] = new PropertyModel
+                        {
+                            type = "array",
+                            items = new ParamterModel
+                            {
+                                type = "object",
+                                properties = new Dictionary<string, PropertyModel>
+                                {
+                                    ["textGuid"] = new PropertyModel
+                                    {
+                                        type = "string",
+                                        description = "Each context has a TextGuid followed by the actual message."
+                                    },
+                                    ["textName"] = new PropertyModel
+                                    {
+                                        type = "string",
+                                        description = "Each context has a TextName followed by the actual message."
+                                    },
+                                }
+                            }
+                        }
+                    },
+                    required = required
+                }
+            };
+            functions.Add(functionCall);
+            var function_call = new
+            {
+                name = functionName,
+            };
+            var qaResult = await _openAIHttpService.GetChatGPTFunctionCallingResponse(prompt, 0.0, 1024, functions, function_call);
+            var idsList = JsonConvert.DeserializeObject<QAFunctionCallResponseModel>(qaResult);
+            var guids = new List<Guid>();
+            guids.AddRange(idsList.data.Select(id => Guid.Parse(id.textGuid)));
             return guids;
         }
 

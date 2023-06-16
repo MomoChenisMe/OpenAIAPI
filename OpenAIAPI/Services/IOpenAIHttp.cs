@@ -55,6 +55,16 @@ namespace OpenAIAPI.Services
         /// <param name="maxTokens">生成回應的最大Token數量</param>
         /// <returns>聊天GPT回應的非同步任務</returns>
         Task<string> GetCustomChatGPTResponse(string inputText, double temperature, int maxTokens);
+        /// <summary>
+        /// 獲取自定義聊天GPT的回應。
+        /// </summary>
+        /// <param name="inputText">輸入的文字內容</param>
+        /// <param name="temperature">溫度參數，控制回應的隨機性。較高的溫度生成更隨機的回應，較低的溫度生成更確定性的回應</param>
+        /// <param name="maxTokens">生成回應的最大Token數量</param>
+        /// <param name="functions">要使用的function JSON Schema格式資料</param>
+        /// <param name="function_call">選擇Function Calling的方式，可以是"auto"、{ 指定的Function Name }、"none"</param>
+        /// <returns>聊天GPT回應的非同步任務</returns>
+        Task<string> GetChatGPTFunctionCallingResponse(string inputText, double temperature, int maxTokens, List<FunctionCallModel> functions, dynamic function_call);
     }
 
     public class OpenAIHttpService : IOpenAIHttpService
@@ -400,6 +410,59 @@ namespace OpenAIAPI.Services
             else
             {
                 throw new Exception($"GetCustomChatGPTResponse錯誤 : {response.ReasonPhrase}");
+            }
+        }
+
+        /// <summary>
+        /// 獲取自定義聊天GPT的回應。
+        /// </summary>
+        /// <param name="inputText">輸入的文字內容</param>
+        /// <param name="temperature">溫度參數，控制回應的隨機性。較高的溫度生成更隨機的回應，較低的溫度生成更確定性的回應</param>
+        /// <param name="maxTokens">生成回應的最大Token數量</param>
+        /// <param name="functions">要使用的function JSON Schema格式資料</param>
+        /// <param name="function_call">選擇Function Calling的方式，可以是"auto"、{ 指定的Function Name }、"none"</param>
+        /// <returns>聊天GPT回應的非同步任務</returns>
+        public async Task<string> GetChatGPTFunctionCallingResponse(string inputText, double temperature, int maxTokens, List<FunctionCallModel> functions, dynamic function_call)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            List<ChatGPTMessageModel> messages = new List<ChatGPTMessageModel>();
+
+            ChatGPTMessageModel message = new ChatGPTMessageModel()
+            {
+                role = "user",
+                content = inputText
+            };
+            messages.Add(message);
+
+            var requestData = new ChatGPTFunctionCallRequestModel()
+            {
+                model = chatGPTModel,
+                messages = messages,
+                temperature = temperature,
+                functions = functions,
+                function_call = function_call,
+                max_tokens = maxTokens > 2048 ? 2048 : maxTokens,
+                top_p = 1,
+                stream = false
+            };
+
+            var content = new StringContent(JsonConvert.SerializeObject(requestData, new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+            }), Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync(RequestURL + "chat/completions", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                dynamic data = JsonConvert.DeserializeObject(jsonResponse);
+                return data.choices[0].message.function_call.arguments.ToString();
+            }
+            else
+            {
+                throw new Exception($"GetCustomChatGPTResponse錯誤 : {response.Content.ToString()}");
             }
         }
     }
